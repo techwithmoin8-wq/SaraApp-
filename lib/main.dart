@@ -38,8 +38,7 @@ class Order {
         customer: j['customer'],
         qty500: j['qty500'],
         qty1000: j['qty1000'],
-        status:
-            OrderStatus.values.firstWhere((e) => e.name == (j['status'] as String)),
+        status: OrderStatus.values.firstWhere((e) => e.name == (j['status'] as String)),
         date: DateTime.parse(j['date']),
       );
 }
@@ -47,18 +46,14 @@ class Order {
 class StockItem {
   String name, uom;
   double qty, unitCost;
-  StockItem(
-      {required this.name,
-      required this.uom,
-      required this.qty,
-      this.unitCost = 0});
-  Map<String, dynamic> toJson() =>
-      {'name': name, 'uom': uom, 'qty': qty, 'unitCost': unitCost};
+  StockItem({required this.name, required this.uom, required this.qty, this.unitCost = 0});
+  Map<String, dynamic> toJson() => {'name': name, 'uom': uom, 'qty': qty, 'unitCost': unitCost};
   static StockItem fromJson(Map<String, dynamic> j) => StockItem(
-      name: j['name'],
-      uom: j['uom'],
-      qty: (j['qty'] as num).toDouble(),
-      unitCost: (j['unitCost'] as num?)?.toDouble() ?? 0);
+        name: j['name'],
+        uom: j['uom'],
+        qty: (j['qty'] as num).toDouble(),
+        unitCost: (j['unitCost'] as num?)?.toDouble() ?? 0,
+      );
 }
 
 class CostPart {
@@ -66,8 +61,7 @@ class CostPart {
   double value;
   CostPart(this.name, this.value);
   Map<String, dynamic> toJson() => {'name': name, 'value': value};
-  static CostPart fromJson(Map<String, dynamic> j) =>
-      CostPart(j['name'], (j['value'] as num).toDouble());
+  static CostPart fromJson(Map<String, dynamic> j) => CostPart(j['name'], (j['value'] as num).toDouble());
 }
 
 class Txn {
@@ -75,22 +69,10 @@ class Txn {
   bool isCredit;
   double amount;
   String note;
-  Txn(
-      {required this.date,
-      required this.isCredit,
-      required this.amount,
-      required this.note});
-  Map<String, dynamic> toJson() => {
-        'date': date.toIso8601String(),
-        'isCredit': isCredit,
-        'amount': amount,
-        'note': note
-      };
-  static Txn fromJson(Map<String, dynamic> j) => Txn(
-      date: DateTime.parse(j['date']),
-      isCredit: j['isCredit'],
-      amount: (j['amount'] as num).toDouble(),
-      note: j['note']);
+  Txn({required this.date, required this.isCredit, required this.amount, required this.note});
+  Map<String, dynamic> toJson() => {'date': date.toIso8601String(), 'isCredit': isCredit, 'amount': amount, 'note': note};
+  static Txn fromJson(Map<String, dynamic> j) =>
+      Txn(date: DateTime.parse(j['date']), isCredit: j['isCredit'], amount: (j['amount'] as num).toDouble(), note: j['note']);
 }
 
 class InvRow {
@@ -98,14 +80,9 @@ class InvRow {
   BottleSize size;
   double qty, rate;
   InvRow(this.desc, this.hsn, this.size, this.qty, this.rate);
-  Map<String, dynamic> toJson() =>
-      {'desc': desc, 'hsn': hsn, 'size': size.name, 'qty': qty, 'rate': rate};
+  Map<String, dynamic> toJson() => {'desc': desc, 'hsn': hsn, 'size': size.name, 'qty': qty, 'rate': rate};
   static InvRow fromJson(Map<String, dynamic> j) => InvRow(
-      j['desc'],
-      j['hsn'],
-      BottleSize.values.firstWhere((e) => e.name == j['size']),
-      (j['qty'] as num).toDouble(),
-      (j['rate'] as num).toDouble());
+      j['desc'], j['hsn'], BottleSize.values.firstWhere((e) => e.name == j['size']), (j['qty'] as num).toDouble(), (j['rate'] as num).toDouble());
 }
 
 class InvoiceDoc {
@@ -164,9 +141,7 @@ class AppState extends ChangeNotifier {
   ];
   List<CostPart> costParts = [];
   List<Txn> txns = [];
-  List<InvRow> lastInvoiceRows = [
-    InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10)
-  ];
+  List<InvRow> lastInvoiceRows = [InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10)];
   List<InvoiceDoc> invoices = [];
 
   Future<void> load() async {
@@ -174,40 +149,16 @@ class AppState extends ChangeNotifier {
     final s = sp.getString(_key);
     if (s == null) {
       orders = [
-        Order(
-            id: "ORD-1001",
-            customer: "Sanjay Traders",
-            qty500: 500,
-            qty1000: 0,
-            status: OrderStatus.open,
-            date: DateTime(2024, 7, 1)),
-        Order(
-            id: "ORD-1002",
-            customer: "Akash Enterprises",
-            qty500: 0,
-            qty1000: 750,
-            status: OrderStatus.done,
-            date: DateTime(2024, 7, 1)),
-        Order(
-            id: "ORD-1003",
-            customer: "Mehta Distributors",
-            qty500: 250,
-            qty1000: 0,
-            status: OrderStatus.wip,
-            date: DateTime(2024, 7, 2)),
+        Order(id: "ORD-1001", customer: "Sanjay Traders", qty500: 500, qty1000: 0, status: OrderStatus.open, date: DateTime(2024, 7, 1)),
+        Order(id: "ORD-1002", customer: "Akash Enterprises", qty500: 0, qty1000: 750, status: OrderStatus.done, date: DateTime(2024, 7, 1)),
+        Order(id: "ORD-1003", customer: "Mehta Distributors", qty500: 250, qty1000: 0, status: OrderStatus.wip, date: DateTime(2024, 7, 2)),
       ];
       raw = [
         StockItem(name: "Preforms", uom: "pcs", qty: 5000, unitCost: 5.2),
         StockItem(name: "Caps", uom: "pcs", qty: 5000, unitCost: 0.8),
         StockItem(name: "Labels", uom: "pcs", qty: 5000, unitCost: 0.5),
       ];
-      costParts = [
-        CostPart("Preform", 5.2),
-        CostPart("Cap", 0.8),
-        CostPart("Label", 0.5),
-        CostPart("Utilities", 0.35),
-        CostPart("Labour", 0.5),
-      ];
+      costParts = [CostPart("Preform", 5.2), CostPart("Cap", 0.8), CostPart("Label", 0.5), CostPart("Utilities", 0.35), CostPart("Labour", 0.5)];
       txns = [Txn(date: DateTime.now(), isCredit: true, amount: 1000, note: "Opening")];
       await save();
       return;
@@ -218,10 +169,8 @@ class AppState extends ChangeNotifier {
     finished = (j['finished'] as List).map((e) => StockItem.fromJson(e)).toList();
     costParts = (j['costParts'] as List).map((e) => CostPart.fromJson(e)).toList();
     txns = (j['txns'] as List).map((e) => Txn.fromJson(e)).toList();
-    lastInvoiceRows =
-        (j['lastInvoiceRows'] as List).map((e) => InvRow.fromJson(e)).toList();
-    invoices =
-        (j['invoices'] as List? ?? []).map((e) => InvoiceDoc.fromJson(e)).toList();
+    lastInvoiceRows = (j['lastInvoiceRows'] as List).map((e) => InvRow.fromJson(e)).toList();
+    invoices = (j['invoices'] as List? ?? []).map((e) => InvoiceDoc.fromJson(e)).toList();
     notifyListeners();
   }
 
@@ -240,24 +189,13 @@ class AppState extends ChangeNotifier {
   }
 
   int countStatus(OrderStatus st) => orders.where((o) => o.status == st).length;
-  int qtyByStatus(OrderStatus st) =>
-      orders.where((o) => o.status == st).fold(0, (s, o) => s + o.totalQty);
-  int qty500ByStatus(OrderStatus st) =>
-      orders.where((o) => o.status == st).fold(0, (s, o) => s + o.qty500);
-  int qty1000ByStatus(OrderStatus st) =>
-      orders.where((o) => o.status == st).fold(0, (s, o) => s + o.qty1000);
+  int qtyByStatus(OrderStatus st) => orders.where((o) => o.status == st).fold(0, (s, o) => s + o.totalQty);
+  int qty500ByStatus(OrderStatus st) => orders.where((o) => o.status == st).fold(0, (s, o) => s + o.qty500);
+  int qty1000ByStatus(OrderStatus st) => orders.where((o) => o.status == st).fold(0, (s, o) => s + o.qty1000);
 
   void addOrder(String customer, int q500, int q1000) {
     final next = 1000 + orders.length + 1;
-    orders.insert(
-        0,
-        Order(
-            id: "ORD-$next",
-            customer: customer,
-            qty500: q500,
-            qty1000: q1000,
-            status: OrderStatus.open,
-            date: DateTime.now()));
+    orders.insert(0, Order(id: "ORD-$next", customer: customer, qty500: q500, qty1000: q1000, status: OrderStatus.open, date: DateTime.now()));
     save();
     notifyListeners();
   }
@@ -290,16 +228,14 @@ class AppState extends ChangeNotifier {
       raw[i].qty += qty;
       if (unitCost != null) raw[i].unitCost = unitCost;
     } else {
-      raw.add(StockItem(
-          name: name, uom: uom, qty: qty, unitCost: unitCost ?? 0));
+      raw.add(StockItem(name: name, uom: uom, qty: qty, unitCost: unitCost ?? 0));
     }
     save();
     notifyListeners();
   }
 
   void addTxn(bool credit, double amount, String note) {
-    txns.insert(0,
-        Txn(date: DateTime.now(), isCredit: credit, amount: amount, note: note));
+    txns.insert(0, Txn(date: DateTime.now(), isCredit: credit, amount: amount, note: note));
     save();
     notifyListeners();
   }
@@ -323,8 +259,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get unitCostTotal =>
-      costParts.fold(0.0, (s, c) => s + c.value);
+  double get unitCostTotal => costParts.fold(0.0, (s, c) => s + c.value);
 
   void storeInvoiceRows(List<InvRow> r) {
     lastInvoiceRows = r;
@@ -343,14 +278,12 @@ class AppState extends ChangeNotifier {
   }
 
   void _consumeRaw(String name, int q) {
-    final i =
-        raw.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
+    final i = raw.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
     if (i >= 0) raw[i].qty = (raw[i].qty - q).clamp(0, double.infinity);
   }
 
   void _addRaw(String name, int q) {
-    final i =
-        raw.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
+    final i = raw.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
     if (i >= 0) {
       raw[i].qty += q.toDouble();
     } else {
@@ -359,19 +292,16 @@ class AppState extends ChangeNotifier {
   }
 
   void _addFinished(String name, int q) {
-    final i = finished
-        .indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
+    final i = finished.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
     if (i >= 0) {
       finished[i].qty += q.toDouble();
     } else {
-      finished
-          .add(StockItem(name: name, uom: "pcs", qty: q.toDouble()));
+      finished.add(StockItem(name: name, uom: "pcs", qty: q.toDouble()));
     }
   }
 
   void _consumeFinished(String name, int q) {
-    final i = finished
-        .indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
+    final i = finished.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
     if (i >= 0) {
       finished[i].qty = (finished[i].qty - q).clamp(0, double.infinity);
     }
@@ -401,18 +331,16 @@ class _RootAppState extends State<RootApp> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: state,
-      builder: (_) => MaterialApp(
+      builder: (context, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "Sara Industries – GST",
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme:
-              ColorScheme.fromSeed(seedColor: const Color(0xFF0B74B5)),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B74B5)),
         ),
         home: ready
             ? LoginPage(state: state)
-            : const Scaffold(
-                body: Center(child: CircularProgressIndicator())),
+            : const Scaffold(body: Center(child: CircularProgressIndicator())),
       ),
     );
   }
@@ -440,39 +368,22 @@ class _LoginPageState extends State<LoginPage> {
                 constraints: const BoxConstraints(maxWidth: 360),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   const Text("AQUASAAR",
-                      style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.3)),
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
                   const SizedBox(height: 8),
-                  const Text("Sara Industries",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                  const Text("Sara Industries", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
-                  TextField(
-                      controller: u,
-                      decoration:
-                          const InputDecoration(labelText: "Username")),
+                  TextField(controller: u, decoration: const InputDecoration(labelText: "Username")),
                   const SizedBox(height: 8),
-                  TextField(
-                      controller: p,
-                      obscureText: true,
-                      decoration:
-                          const InputDecoration(labelText: "Password")),
+                  TextField(controller: p, obscureText: true, decoration: const InputDecoration(labelText: "Password")),
                   if (err != null)
                     Padding(
                         padding: const EdgeInsets.only(top: 6),
-                        child:
-                            Text(err!, style: const TextStyle(color: Colors.red))),
+                        child: Text(err!, style: const TextStyle(color: Colors.red))),
                   const SizedBox(height: 10),
                   FilledButton(
                       onPressed: () {
                         if (u.text.trim() == "admin" && p.text == "1234") {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      Dashboard(state: widget.state)));
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Dashboard(state: widget.state)));
                         } else {
                           setState(() => err = "Invalid (use admin / 1234)");
                         }
@@ -500,14 +411,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final s = widget.state;
-    final pages = [
-      HomeTab(s: s),
-      InvoiceTab(s: s),
-      OrdersTab(s: s),
-      StockTab(s: s),
-      MaterialsTab(s: s),
-      AccountsTab(s: s)
-    ];
+    final pages = [HomeTab(s: s), InvoiceTab(s: s), OrdersTab(s: s), StockTab(s: s), MaterialsTab(s: s), AccountsTab(s: s)];
     return Scaffold(
       appBar: AppBar(title: const Text("SARA INDUSTRIES")),
       body: pages[idx],
@@ -519,10 +423,8 @@ class _DashboardState extends State<Dashboard> {
           NavigationDestination(icon: Icon(Icons.receipt_long), label: "Invoice"),
           NavigationDestination(icon: Icon(Icons.list_alt), label: "Orders"),
           NavigationDestination(icon: Icon(Icons.inventory_2), label: "Stock"),
-          NavigationDestination(
-              icon: Icon(Icons.precision_manufacturing), label: "Materials"),
-          NavigationDestination(
-              icon: Icon(Icons.account_balance), label: "Accounts"),
+          NavigationDestination(icon: Icon(Icons.precision_manufacturing), label: "Materials"),
+          NavigationDestination(icon: Icon(Icons.account_balance), label: "Accounts"),
         ],
       ),
     );
@@ -538,22 +440,16 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: s,
-      builder: (_) => SingleChildScrollView(
+      builder: (context, _) => SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-                color: const Color(0xFF0B74B5),
-                borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: const Color(0xFF0B74B5), borderRadius: BorderRadius.circular(14)),
             child: Row(children: const [
               Text("AQUASAAR",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2)),
+                  style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
               Spacer(),
               Icon(Icons.water_drop, color: Colors.white),
             ]),
@@ -562,45 +458,27 @@ class HomeTab extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-                color: Colors.orange.shade700,
-                borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: Colors.orange.shade700, borderRadius: BorderRadius.circular(14)),
             child: Wrap(spacing: 16, runSpacing: 8, children: [
-              _chip("Open", s.countStatus(OrderStatus.open),
-                  s.qtyByStatus(OrderStatus.open), Icons.water_drop),
-              _chip("In Progress", s.countStatus(OrderStatus.wip),
-                  s.qtyByStatus(OrderStatus.wip), Icons.local_shipping),
-              _chip("Completed", s.countStatus(OrderStatus.done),
-                  s.qtyByStatus(OrderStatus.done), Icons.verified),
+              _chip("Open", s.countStatus(OrderStatus.open), s.qtyByStatus(OrderStatus.open), Icons.water_drop),
+              _chip("In Progress", s.countStatus(OrderStatus.wip), s.qtyByStatus(OrderStatus.wip), Icons.local_shipping),
+              _chip("Completed", s.countStatus(OrderStatus.done), s.qtyByStatus(OrderStatus.done), Icons.verified),
             ]),
           ),
           const SizedBox(height: 10),
           Row(children: [
-            Expanded(
-                child: _miniStat(
-                    "500 ml",
-                    "Open ${s.qty500ByStatus(OrderStatus.open)} • WIP ${s.qty500ByStatus(OrderStatus.wip)} • Done ${s.qty500ByStatus(OrderStatus.done)}")),
+            Expanded(child: _miniStat("500 ml", "Open ${s.qty500ByStatus(OrderStatus.open)} • WIP ${s.qty500ByStatus(OrderStatus.wip)} • Done ${s.qty500ByStatus(OrderStatus.done)}")),
             const SizedBox(width: 8),
-            Expanded(
-                child: _miniStat(
-                    "1 L",
-                    "Open ${s.qty1000ByStatus(OrderStatus.open)} • WIP ${s.qty1000ByStatus(OrderStatus.wip)} • Done ${s.qty1000ByStatus(OrderStatus.done)}")),
+            Expanded(child: _miniStat("1 L", "Open ${s.qty1000ByStatus(OrderStatus.open)} • WIP ${s.qty1000ByStatus(OrderStatus.wip)} • Done ${s.qty1000ByStatus(OrderStatus.done)}")),
           ]),
           const SizedBox(height: 12),
           for (final o in s.orders.take(3))
             Card(
                 child: ListTile(
-              title: Text("${o.customer}  •  ${o.id}",
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: Text(
-                  "${o.qty500}×500ml, ${o.qty1000}×1L  •  ${DateFormat('dd/MM/yyyy').format(o.date)}"),
+              title: Text("${o.customer}  •  ${o.id}", style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Text("${o.qty500}×500ml, ${o.qty1000}×1L  •  ${DateFormat('dd/MM/yyyy').format(o.date)}"),
               trailing: Chip(
-                label: Text(
-                    o.status == OrderStatus.open
-                        ? "Open"
-                        : o.status == OrderStatus.wip
-                            ? "In Progress"
-                            : "Completed",
+                label: Text(o.status == OrderStatus.open ? "Open" : o.status == OrderStatus.wip ? "In Progress" : "Completed",
                     style: const TextStyle(color: Colors.white)),
                 backgroundColor: o.status == OrderStatus.open
                     ? Colors.blue
@@ -616,31 +494,22 @@ class HomeTab extends StatelessWidget {
 
   Widget _chip(String label, int orders, int qty, IconData icon) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.12),
-            borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(color: Colors.white.withOpacity(.12), borderRadius: BorderRadius.circular(10)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, color: Colors.white, size: 18),
           const SizedBox(width: 8),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w700)),
-            Text("$orders orders • $qty bottles",
-                style: const TextStyle(color: Colors.white, fontSize: 12)),
+            Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            Text("$orders orders • $qty bottles", style: const TextStyle(color: Colors.white, fontSize: 12)),
           ]),
         ]),
       );
 
   Widget _miniStat(String title, String line) => Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(12)),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 4),
           Text(line, style: const TextStyle(fontSize: 12)),
         ]),
@@ -663,21 +532,19 @@ class _InvoiceTabState extends State<InvoiceTab> {
   final buyer = TextEditingController(text: "Test Depot");
   final gstin = TextEditingController(text: "27ABCDE1234F1Z5");
   final addr = TextEditingController(text: "KGN layout, Ramtek");
-  final inv  = TextEditingController(text: "S/2025/001");
+  final inv = TextEditingController(text: "S/2025/001");
 
   @override
   void initState() {
     super.initState();
-    rows = widget.s.lastInvoiceRows
-        .map((e) => InvRow(e.desc, e.hsn, e.size, e.qty, e.rate))
-        .toList();
+    rows = widget.s.lastInvoiceRows.map((e) => InvRow(e.desc, e.hsn, e.size, e.qty, e.rate)).toList();
   }
 
   void _persist() => widget.s.storeInvoiceRows(rows);
 
   double get sub => rows.fold(0.0, (s, r) => s + r.qty * r.rate);
-  double get cg  => sub * (double.tryParse(cgst.text) ?? 0) / 100;
-  double get sg  => sub * (double.tryParse(sgst.text) ?? 0) / 100;
+  double get cg => sub * (double.tryParse(cgst.text) ?? 0) / 100;
+  double get sg => sub * (double.tryParse(sgst.text) ?? 0) / 100;
   double get tot => sub + cg + sg;
 
   void _saveInvoice() {
@@ -694,52 +561,45 @@ class _InvoiceTabState extends State<InvoiceTab> {
       total: tot,
     );
     widget.s.saveInvoice(doc);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Invoice saved")));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invoice saved")));
   }
 
   Future<void> _sharePdf() async {
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
-        build: (c) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text("SARA INDUSTRIES — TAX INVOICE",
-                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 8),
-            pw.Text("Invoice: ${inv.text}"),
-            pw.Text("Date: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}"),
-            pw.Text("Buyer: ${buyer.text}"),
-            pw.Text("GSTIN: ${gstin.text}"),
-            pw.Text("Address: ${addr.text}"),
-            pw.SizedBox(height: 10),
-            pw.Table.fromTextArray(
-              headers: ["Description", "Size", "HSN", "Qty", "Rate", "Amount"],
-              data: rows.map((r) => [
-                r.desc,
-                sizeLabel(r.size),
-                r.hsn,
-                r.qty.toStringAsFixed(2),
-                r.rate.toStringAsFixed(2),
-                (r.qty * r.rate).toStringAsFixed(2),
-              ]).toList(),
-              cellAlignment: pw.Alignment.centerLeft,
-            ),
-            pw.SizedBox(height: 10),
-            pw.Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
-            pw.Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
-            pw.Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
-            pw.Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          ],
-        ),
+        build: (c) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text("SARA INDUSTRIES — TAX INVOICE", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 8),
+          pw.Text("Invoice: ${inv.text}"),
+          pw.Text("Date: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}"),
+          pw.Text("Buyer: ${buyer.text}"),
+          pw.Text("GSTIN: ${gstin.text}"),
+          pw.Text("Address: ${addr.text}"),
+          pw.SizedBox(height: 10),
+          pw.Table.fromTextArray(
+            headers: ["Description", "Size", "HSN", "Qty", "Rate", "Amount"],
+            data: rows
+                .map((r) => [
+                      r.desc,
+                      sizeLabel(r.size),
+                      r.hsn,
+                      r.qty.toStringAsFixed(2),
+                      r.rate.toStringAsFixed(2),
+                      (r.qty * r.rate).toStringAsFixed(2),
+                    ])
+                .toList(),
+            cellAlignment: pw.Alignment.centerLeft,
+          ),
+          pw.SizedBox(height: 10),
+          pw.Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
+          pw.Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
+          pw.Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
+          pw.Text("Grand Total: ₹${tot.toStringAsFixed(2)}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        ]),
       ),
     );
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: "${inv.text.replaceAll('/', '-')}.pdf",
-    );
+    await Printing.sharePdf(bytes: await pdf.save(), filename: "${inv.text.replaceAll('/', '-')}.pdf");
   }
 
   @override
@@ -751,36 +611,22 @@ class _InvoiceTabState extends State<InvoiceTab> {
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 160),
         child: ListView(children: [
           Row(children: [
-            Expanded(child: TextField(
-              controller: inv,
-              decoration: const InputDecoration(labelText: "Invoice No"),
-            )),
+            Expanded(child: TextField(controller: inv, decoration: const InputDecoration(labelText: "Invoice No"))),
             const SizedBox(width: 10),
-            Expanded(child: TextField(
+            Expanded(
+                child: TextField(
               readOnly: true,
-              decoration: InputDecoration(
-                labelText: "Date",
-                hintText: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-              ),
+              decoration: InputDecoration(labelText: "Date", hintText: DateFormat('dd-MM-yyyy').format(DateTime.now())),
             )),
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            Expanded(child: TextField(
-              controller: buyer,
-              decoration: const InputDecoration(labelText: "Buyer Name"),
-            )),
+            Expanded(child: TextField(controller: buyer, decoration: const InputDecoration(labelText: "Buyer Name"))),
             const SizedBox(width: 10),
-            Expanded(child: TextField(
-              controller: gstin,
-              decoration: const InputDecoration(labelText: "Buyer GSTIN"),
-            )),
+            Expanded(child: TextField(controller: gstin, decoration: const InputDecoration(labelText: "Buyer GSTIN"))),
           ]),
           const SizedBox(height: 8),
-          TextField(
-            controller: addr,
-            decoration: const InputDecoration(labelText: "Buyer Address"),
-          ),
+          TextField(controller: addr, decoration: const InputDecoration(labelText: "Buyer Address")),
           const SizedBox(height: 14),
 
           for (int i = 0; i < rows.length; i++)
@@ -791,7 +637,10 @@ class _InvoiceTabState extends State<InvoiceTab> {
                 child: Column(children: [
                   TextField(
                     controller: TextEditingController(text: rows[i].desc),
-                    onChanged: (v) { rows[i].desc = v; _persist(); },
+                    onChanged: (v) {
+                      rows[i].desc = v;
+                      _persist();
+                    },
                     style: txt,
                     decoration: const InputDecoration(labelText: "Description"),
                   ),
@@ -802,113 +651,116 @@ class _InvoiceTabState extends State<InvoiceTab> {
                       DropdownMenuItem(value: BottleSize.ml500, child: Text("500 ml")),
                       DropdownMenuItem(value: BottleSize.l1, child: Text("1 L")),
                     ],
-                    onChanged: (v) { if (v!=null) { rows[i].size = v; _persist(); setState((){}); } },
+                    onChanged: (v) {
+                      if (v != null) {
+                        rows[i].size = v;
+                        _persist();
+                        setState(() {});
+                      }
+                    },
                     decoration: const InputDecoration(labelText: "Size"),
                   ),
                   const SizedBox(height: 6),
                   TextField(
                     controller: TextEditingController(text: rows[i].hsn),
-                    onChanged: (v) { rows[i].hsn = v; _persist(); },
+                    onChanged: (v) {
+                      rows[i].hsn = v;
+                      _persist();
+                    },
                     style: txt,
                     decoration: const InputDecoration(labelText: "HSN"),
                   ),
                   const SizedBox(height: 6),
                   Row(children: [
-                    Expanded(child: TextField(
+                    Expanded(
+                        child: TextField(
                       controller: TextEditingController(text: rows[i].qty.toStringAsFixed(2)),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (v) { rows[i].qty = double.tryParse(v) ?? 0; _persist(); setState((){}); },
+                      onChanged: (v) {
+                        rows[i].qty = double.tryParse(v) ?? 0;
+                        _persist();
+                        setState(() {});
+                      },
                       decoration: const InputDecoration(labelText: "Quantity"),
                     )),
                     const SizedBox(width: 10),
-                    Expanded(child: TextField(
+                    Expanded(
+                        child: TextField(
                       controller: TextEditingController(text: rows[i].rate.toStringAsFixed(2)),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (v) { rows[i].rate = double.tryParse(v) ?? 0; _persist(); setState((){}); },
+                      onChanged: (v) {
+                        rows[i].rate = double.tryParse(v) ?? 0;
+                        _persist();
+                        setState(() {});
+                      },
                       decoration: const InputDecoration(labelText: "Rate"),
                     )),
                   ]),
                   const SizedBox(height: 6),
                   Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "Amount: ₹${(rows[i].qty * rows[i].rate).toStringAsFixed(2)}",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                  ),
+                      alignment: Alignment.centerRight,
+                      child: Text("Amount: ₹${(rows[i].qty * rows[i].rate).toStringAsFixed(2)}",
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
                   Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      onPressed: () { setState(() => rows.removeAt(i)); _persist(); },
-                      icon: const Icon(Icons.delete_outline),
-                    ),
-                  ),
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                          onPressed: () {
+                            setState(() => rows.removeAt(i));
+                            _persist();
+                          },
+                          icon: const Icon(Icons.delete_outline))),
                 ]),
               ),
             ),
 
           Row(children: [
-            Expanded(child: TextField(
+            Expanded(
+                child: TextField(
               controller: cgst,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: "CGST %"),
-              onChanged: (_) => setState((){}),
+              onChanged: (_) => setState(() {}),
             )),
             const SizedBox(width: 10),
-            Expanded(child: TextField(
+            Expanded(
+                child: TextField(
               controller: sgst,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: "SGST %"),
-              onChanged: (_) => setState((){}),
+              onChanged: (_) => setState(() {}),
             )),
           ]),
           const SizedBox(height: 8),
           Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
-                Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
-                Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
-                const SizedBox(height: 4),
-                Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-              ]),
-            ),
-          ),
+              child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
+              Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
+              Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
+              const SizedBox(height: 4),
+              Text("Grand Total: ₹${tot.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.w700)),
+            ]),
+          )),
         ]),
       ),
 
       Positioned(
         bottom: 12,
         right: 12,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            FilledButton.icon(
-              onPressed: _saveInvoice,
-              icon: const Icon(Icons.save),
-              label: const Text("Save"),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: _sharePdf,
-              icon: const Icon(Icons.picture_as_pdf),
-              label: const Text("Share PDF"),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          FilledButton.icon(onPressed: _saveInvoice, icon: const Icon(Icons.save), label: const Text("Save")),
+          const SizedBox(height: 8),
+          FilledButton.icon(onPressed: _sharePdf, icon: const Icon(Icons.picture_as_pdf), label: const Text("Share PDF")),
+          const SizedBox(height: 8),
+          FilledButton.icon(
               onPressed: () {
-                setState(() => rows.add(
-                  InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10),
-                ));
+                setState(() => rows.add(InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10)));
                 _persist();
               },
               icon: const Icon(Icons.add),
-              label: const Text("Add item"),
-            ),
-          ],
-        ),
+              label: const Text("Add item")),
+        ]),
       ),
     ]);
   }
@@ -927,7 +779,7 @@ class OrdersTab extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: s,
-      builder: (_) => Scaffold(
+      builder: (context, _) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
@@ -935,33 +787,19 @@ class OrdersTab extends StatelessWidget {
                   builder: (_) => AlertDialog(
                         title: const Text("New Order"),
                         content: Column(mainAxisSize: MainAxisSize.min, children: [
-                          TextField(
-                              controller: cust,
-                              decoration:
-                                  const InputDecoration(labelText: "Customer")),
+                          TextField(controller: cust, decoration: const InputDecoration(labelText: "Customer")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: q500,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                  labelText: "Qty (500 ml)")),
+                          TextField(controller: q500, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Qty (500 ml)")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: q1000,
-                              keyboardType: TextInputType.number,
-                              decoration:
-                                  const InputDecoration(labelText: "Qty (1 L)")),
+                          TextField(controller: q1000, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Qty (1 L)")),
                         ]),
                         actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
                           FilledButton(
                               onPressed: () {
                                 final a = int.tryParse(q500.text.trim()) ?? 0;
                                 final b = int.tryParse(q1000.text.trim()) ?? 0;
-                                if (cust.text.trim().isNotEmpty &&
-                                    (a > 0 || b > 0)) {
+                                if (cust.text.trim().isNotEmpty && (a > 0 || b > 0)) {
                                   s.addOrder(cust.text.trim(), a, b);
                                   Navigator.pop(context);
                                 }
@@ -979,18 +817,14 @@ class OrdersTab extends StatelessWidget {
             return Card(
               child: ListTile(
                 title: Text("${o.customer}  •  ${o.id}"),
-                subtitle: Text(
-                    "500ml: ${o.qty500} • 1L: ${o.qty1000} • ${DateFormat('dd-MM-yyyy').format(o.date)}"),
+                subtitle: Text("500ml: ${o.qty500} • 1L: ${o.qty1000} • ${DateFormat('dd-MM-yyyy').format(o.date)}"),
                 trailing: DropdownButton<OrderStatus>(
                   value: o.status,
                   underline: const SizedBox.shrink(),
                   items: const [
-                    DropdownMenuItem(
-                        value: OrderStatus.open, child: Text("Open")),
-                    DropdownMenuItem(
-                        value: OrderStatus.wip, child: Text("In Progress")),
-                    DropdownMenuItem(
-                        value: OrderStatus.done, child: Text("Completed")),
+                    DropdownMenuItem(value: OrderStatus.open, child: Text("Open")),
+                    DropdownMenuItem(value: OrderStatus.wip, child: Text("In Progress")),
+                    DropdownMenuItem(value: OrderStatus.done, child: Text("Completed")),
                   ],
                   onChanged: (v) {
                     if (v != null) s.updateOrderStatus(o, v);
@@ -1020,7 +854,7 @@ class StockTab extends StatelessWidget {
     final cost = TextEditingController(text: "0");
     return AnimatedBuilder(
       animation: s,
-      builder: (_) => Scaffold(
+      builder: (context, _) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
@@ -1028,45 +862,22 @@ class StockTab extends StatelessWidget {
                   builder: (_) => AlertDialog(
                         title: const Text("Inward Raw Material"),
                         content: Column(mainAxisSize: MainAxisSize.min, children: [
-                          TextField(
-                              controller: name,
-                              decoration:
-                                  const InputDecoration(labelText: "Item name")),
+                          TextField(controller: name, decoration: const InputDecoration(labelText: "Item name")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: uom,
-                              decoration:
-                                  const InputDecoration(labelText: "UOM")),
+                          TextField(controller: uom, decoration: const InputDecoration(labelText: "UOM")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: qty,
-                              keyboardType: TextInputType.number,
-                              decoration:
-                                  const InputDecoration(labelText: "Qty")),
+                          TextField(controller: qty, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Qty")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: cost,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                  labelText: "Unit cost (₹)")),
+                          TextField(controller: cost, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Unit cost (₹)")),
                         ]),
                         actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
                           FilledButton(
                               onPressed: () {
-                                final q =
-                                    double.tryParse(qty.text.trim()) ?? 0;
+                                final q = double.tryParse(qty.text.trim()) ?? 0;
                                 final c = double.tryParse(cost.text.trim());
                                 if (name.text.trim().isNotEmpty && q > 0) {
-                                  s.inwardRaw(
-                                      name.text.trim(),
-                                      uom.text.trim().isEmpty
-                                          ? "pcs"
-                                          : uom.text.trim(),
-                                      q,
-                                      unitCost: c);
+                                  s.inwardRaw(name.text.trim(), uom.text.trim().isEmpty ? "pcs" : uom.text.trim(), q, unitCost: c);
                                   Navigator.pop(context);
                                 }
                               },
@@ -1079,30 +890,24 @@ class StockTab extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(children: [
-            const Text("Raw Materials",
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text("Raw Materials", style: TextStyle(fontWeight: FontWeight.w600)),
             Expanded(
                 child: ListView(
                     children: s.raw
                         .map((r) => ListTile(
                               title: Text(r.name),
-                              subtitle: Text(
-                                  "Qty: ${r.qty.toStringAsFixed(0)} ${r.uom}"),
-                              trailing: r.unitCost > 0
-                                  ? Text("₹${r.unitCost}")
-                                  : const SizedBox(),
+                              subtitle: Text("Qty: ${r.qty.toStringAsFixed(0)} ${r.uom}"),
+                              trailing: r.unitCost > 0 ? Text("₹${r.unitCost}") : const SizedBox(),
                             ))
                         .toList())),
             const Divider(),
-            const Text("Finished Goods",
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text("Finished Goods", style: TextStyle(fontWeight: FontWeight.w600)),
             Expanded(
                 child: ListView(
                     children: s.finished
                         .map((f) => ListTile(
                               title: Text(f.name),
-                              subtitle: Text(
-                                  "Qty: ${f.qty.toStringAsFixed(0)} ${f.uom}"),
+                              subtitle: Text("Qty: ${f.qty.toStringAsFixed(0)} ${f.uom}"),
                             ))
                         .toList())),
           ]),
@@ -1124,7 +929,7 @@ class MaterialsTab extends StatelessWidget {
     final cur = NumberFormat.currency(locale: "en_IN", symbol: "₹");
     return AnimatedBuilder(
       animation: s,
-      builder: (_) => Scaffold(
+      builder: (context, _) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
@@ -1132,21 +937,12 @@ class MaterialsTab extends StatelessWidget {
                   builder: (_) => AlertDialog(
                         title: const Text("Add cost item"),
                         content: Column(mainAxisSize: MainAxisSize.min, children: [
-                          TextField(
-                              controller: name,
-                              decoration:
-                                  const InputDecoration(labelText: "Name")),
+                          TextField(controller: name, decoration: const InputDecoration(labelText: "Name")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: val,
-                              keyboardType: TextInputType.number,
-                              decoration:
-                                  const InputDecoration(labelText: "Cost (₹)")),
+                          TextField(controller: val, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Cost (₹)")),
                         ]),
                         actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
                           FilledButton(
                               onPressed: () {
                                 final v = double.tryParse(val.text.trim()) ?? 0;
@@ -1163,8 +959,7 @@ class MaterialsTab extends StatelessWidget {
             label: const Text("Add Item")),
         body: Padding(
           padding: const EdgeInsets.all(12),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
                 child: ListView.separated(
               itemBuilder: (_, i) {
@@ -1174,24 +969,18 @@ class MaterialsTab extends StatelessWidget {
                       child: TextField(
                     controller: TextEditingController(text: cp.name),
                     decoration: const InputDecoration(labelText: "Item"),
-                    onChanged: (v) =>
-                        s.updateCost(i, v.trim().isEmpty ? cp.name : v.trim(), cp.value),
+                    onChanged: (v) => s.updateCost(i, v.trim().isEmpty ? cp.name : v.trim(), cp.value),
                   )),
                   const SizedBox(width: 8),
                   SizedBox(
                       width: 120,
                       child: TextField(
-                        controller: TextEditingController(
-                            text: cp.value.toStringAsFixed(2)),
+                        controller: TextEditingController(text: cp.value.toStringAsFixed(2)),
                         keyboardType: TextInputType.number,
-                        decoration:
-                            const InputDecoration(labelText: "Cost (₹)"),
-                        onChanged: (v) => s.updateCost(
-                            i, cp.name, double.tryParse(v.trim()) ?? cp.value),
+                        decoration: const InputDecoration(labelText: "Cost (₹)"),
+                        onChanged: (v) => s.updateCost(i, cp.name, double.tryParse(v.trim()) ?? cp.value),
                       )),
-                  IconButton(
-                      onPressed: () => s.deleteCost(i),
-                      icon: const Icon(Icons.delete_outline)),
+                  IconButton(onPressed: () => s.deleteCost(i), icon: const Icon(Icons.delete_outline)),
                 ]);
               },
               separatorBuilder: (_, __) => const Divider(height: 1),
@@ -1200,8 +989,7 @@ class MaterialsTab extends StatelessWidget {
             Card(
                 child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Text("Grand Total (per bottle): ${cur.format(s.unitCostTotal)}",
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              child: Text("Grand Total (per bottle): ${cur.format(s.unitCostTotal)}", style: const TextStyle(fontWeight: FontWeight.w700)),
             )),
             const SizedBox(height: 70),
           ]),
@@ -1228,16 +1016,12 @@ class _AccountsTabState extends State<AccountsTab> {
     final cur = NumberFormat.currency(locale: "en_IN", symbol: "₹");
     List<Txn> filtered = s.txns.where((t) {
       final d = DateTime(t.date.year, t.date.month, t.date.day);
-      final okF =
-          from == null || !d.isBefore(DateTime(from!.year, from!.month, from!.day));
-      final okT =
-          to == null || !d.isAfter(DateTime(to!.year, to!.month, to!.day));
+      final okF = from == null || !d.isBefore(DateTime(from!.year, from!.month, from!.day));
+      final okT = to == null || !d.isAfter(DateTime(to!.year, to!.month, to!.day));
       return okF && okT;
     }).toList();
-    final cr =
-        filtered.where((t) => t.isCredit).fold(0.0, (a, b) => a + b.amount);
-    final dr =
-        filtered.where((t) => !t.isCredit).fold(0.0, (a, b) => a + b.amount);
+    final cr = filtered.where((t) => t.isCredit).fold(0.0, (a, b) => a + b.amount);
+    final dr = filtered.where((t) => !t.isCredit).fold(0.0, (a, b) => a + b.amount);
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -1247,41 +1031,24 @@ class _AccountsTabState extends State<AccountsTab> {
             showDialog(
                 context: context,
                 builder: (_) => StatefulBuilder(
-                      builder: (_, setL) => AlertDialog(
+                      builder: (context, setL) => AlertDialog(
                         title: const Text("Add Account Entry"),
-                        content:
-                            Column(mainAxisSize: MainAxisSize.min, children: [
+                        content: Column(mainAxisSize: MainAxisSize.min, children: [
                           Row(children: [
-                            ChoiceChip(
-                                label: const Text("Credit"),
-                                selected: credit,
-                                onSelected: (_) => setL(() => credit = true)),
+                            ChoiceChip(label: const Text("Credit"), selected: credit, onSelected: (_) => setL(() => credit = true)),
                             const SizedBox(width: 8),
-                            ChoiceChip(
-                                label: const Text("Debit"),
-                                selected: !credit,
-                                onSelected: (_) => setL(() => credit = false)),
+                            ChoiceChip(label: const Text("Debit"), selected: !credit, onSelected: (_) => setL(() => credit = false)),
                           ]),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: amt,
-                              keyboardType: TextInputType.number,
-                              decoration:
-                                  const InputDecoration(labelText: "Amount (₹)")),
+                          TextField(controller: amt, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Amount (₹)")),
                           const SizedBox(height: 8),
-                          TextField(
-                              controller: note,
-                              decoration: const InputDecoration(
-                                  labelText: "Description / Particular")),
+                          TextField(controller: note, decoration: const InputDecoration(labelText: "Description / Particular")),
                         ]),
                         actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
                           FilledButton(
                               onPressed: () {
-                                final a =
-                                    double.tryParse(amt.text.trim()) ?? -1;
+                                final a = double.tryParse(amt.text.trim()) ?? -1;
                                 if (a > 0) {
                                   s.addTxn(credit, a, note.text.trim());
                                   Navigator.pop(context);
@@ -1304,40 +1071,27 @@ class _AccountsTabState extends State<AccountsTab> {
                       onPressed: () async {
                         final now = DateTime.now();
                         final d = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(now.year + 1),
-                            initialDate: from ?? now);
+                            context: context, firstDate: DateTime(2020), lastDate: DateTime(now.year + 1), initialDate: from ?? now);
                         if (d != null) setState(() => from = d);
                       },
-                      child: Text(from == null
-                          ? "From date"
-                          : DateFormat('dd-MM-yyyy').format(from!)))),
+                      child: Text(from == null ? "From date" : DateFormat('dd-MM-yyyy').format(from!)))),
               const SizedBox(width: 8),
               Expanded(
                   child: OutlinedButton(
                       onPressed: () async {
                         final now = DateTime.now();
                         final d = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(now.year + 1),
-                            initialDate: to ?? now);
+                            context: context, firstDate: DateTime(2020), lastDate: DateTime(now.year + 1), initialDate: to ?? now);
                         if (d != null) setState(() => to = d);
                       },
-                      child: Text(to == null
-                          ? "To date"
-                          : DateFormat('dd-MM-yyyy').format(to!)))),
-              IconButton(
-                  onPressed: () => setState(() => {from = null, to = null}),
-                  icon: const Icon(Icons.clear)),
+                      child: Text(to == null ? "To date" : DateFormat('dd-MM-yyyy').format(to!)))),
+              IconButton(onPressed: () => setState(() => {from = null, to = null}), icon: const Icon(Icons.clear)),
             ])),
         Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
             child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                    "Selected: Credit ${cur.format(cr)} • Debit ${cur.format(dr)} • Net ${cur.format(cr - dr)}",
+                child: Text("Selected: Credit ${cur.format(cr)} • Debit ${cur.format(dr)} • Net ${cur.format(cr - dr)}",
                     style: const TextStyle(fontWeight: FontWeight.w600)))),
         const Divider(height: 1),
         Expanded(
@@ -1345,12 +1099,9 @@ class _AccountsTabState extends State<AccountsTab> {
           itemBuilder: (_, i) {
             final t = filtered[i];
             return ListTile(
-              leading: Icon(t.isCredit ? Icons.trending_up : Icons.trending_down,
-                  color: t.isCredit ? Colors.green : Colors.red),
-              title: Text(
-                  "${t.isCredit ? "Credit" : "Debit"} • ${cur.format(t.amount)}"),
-              subtitle: Text(
-                  "${DateFormat('dd-MM-yyyy HH:mm').format(t.date)} • ${t.note}"),
+              leading: Icon(t.isCredit ? Icons.trending_up : Icons.trending_down, color: t.isCredit ? Colors.green : Colors.red),
+              title: Text("${t.isCredit ? "Credit" : "Debit"} • ${cur.format(t.amount)}"),
+              subtitle: Text("${DateFormat('dd-MM-yyyy HH:mm').format(t.date)} • ${t.note}"),
             );
           },
           separatorBuilder: (_, __) => const Divider(height: 1),
