@@ -25,13 +25,12 @@ jobs:
           channel: stable
           cache: true
 
-      # Create a clean Flutter app so we always have proper android/ gradle files
+      # ✅ FIXED: lowercase app name
       - name: Create pristine Flutter app
         run: |
-          flutter create --org com.sara --platforms=android SarahAppTmp
-          mv SarahAppTmp SaraApp
+          flutter create --org com.sara --platforms=android saragstapp
+          mv saragstapp SaraApp
 
-      # Inject your sources/assets/pubspec into the clean app
       - name: Inject code & pubspec
         run: |
           rm -rf SaraApp/lib
