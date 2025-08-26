@@ -173,7 +173,6 @@ class AppState extends ChangeNotifier {
     final sp = await SharedPreferences.getInstance();
     final s = sp.getString(_key);
     if (s == null) {
-      // seed demo
       orders = [
         Order(
             id: "ORD-1001",
@@ -240,7 +239,6 @@ class AppState extends ChangeNotifier {
     await sp.setString(_key, jsonEncode(j));
   }
 
-  /* ---- Derived for Home ---- */
   int countStatus(OrderStatus st) => orders.where((o) => o.status == st).length;
   int qtyByStatus(OrderStatus st) =>
       orders.where((o) => o.status == st).fold(0, (s, o) => s + o.totalQty);
@@ -249,7 +247,6 @@ class AppState extends ChangeNotifier {
   int qty1000ByStatus(OrderStatus st) =>
       orders.where((o) => o.status == st).fold(0, (s, o) => s + o.qty1000);
 
-  /* ---- Actions ---- */
   void addOrder(String customer, int q500, int q1000) {
     final next = 1000 + orders.length + 1;
     orders.insert(
@@ -345,7 +342,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /* ---- Helpers ---- */
   void _consumeRaw(String name, int q) {
     final i =
         raw.indexWhere((e) => e.name.toLowerCase() == name.toLowerCase());
@@ -405,7 +401,7 @@ class _RootAppState extends State<RootApp> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: state,
-      builder: (_, __) => MaterialApp(
+      builder: (_) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "Sara Industries – GST",
         theme: ThemeData(
@@ -533,7 +529,7 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-/* ======================= HOME (colorful) ======================= */
+/* ======================= HOME ======================= */
 
 class HomeTab extends StatelessWidget {
   final AppState s;
@@ -542,7 +538,7 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: s,
-      builder: (_, __) => SingleChildScrollView(
+      builder: (_) => SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(children: [
           Container(
@@ -563,7 +559,6 @@ class HomeTab extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 12),
-          // Orange bar — now totals per status + bottles
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -580,7 +575,6 @@ class HomeTab extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 10),
-          // Per size summary
           Row(children: [
             Expanded(
                 child: _miniStat(
@@ -621,8 +615,7 @@ class HomeTab extends StatelessWidget {
   }
 
   Widget _chip(String label, int orders, int qty, IconData icon) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
             color: Colors.white.withOpacity(.12),
             borderRadius: BorderRadius.circular(10)),
@@ -634,8 +627,7 @@ class HomeTab extends StatelessWidget {
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.w700)),
             Text("$orders orders • $qty bottles",
-                style:
-                    const TextStyle(color: Colors.white, fontSize: 12)),
+                style: const TextStyle(color: Colors.white, fontSize: 12)),
           ]),
         ]),
       );
@@ -644,19 +636,18 @@ class HomeTab extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 16)),
-              const SizedBox(height: 4),
-              Text(line, style: const TextStyle(fontSize: 12)),
-            ]),
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title,
+              style:
+                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          const SizedBox(height: 4),
+          Text(line, style: const TextStyle(fontSize: 12)),
+        ]),
       );
 }
 
-/* ======================= INVOICE ======================= */
+/* ======================= INVOICE (vertical + Save + PDF) ======================= */
 
 class InvoiceTab extends StatefulWidget {
   final AppState s;
@@ -672,7 +663,7 @@ class _InvoiceTabState extends State<InvoiceTab> {
   final buyer = TextEditingController(text: "Test Depot");
   final gstin = TextEditingController(text: "27ABCDE1234F1Z5");
   final addr = TextEditingController(text: "KGN layout, Ramtek");
-  final inv = TextEditingController(text: "S/2025/001");
+  final inv  = TextEditingController(text: "S/2025/001");
 
   @override
   void initState() {
@@ -685,53 +676,9 @@ class _InvoiceTabState extends State<InvoiceTab> {
   void _persist() => widget.s.storeInvoiceRows(rows);
 
   double get sub => rows.fold(0.0, (s, r) => s + r.qty * r.rate);
-  double get cg => sub * (double.tryParse(cgst.text) ?? 0) / 100;
-  double get sg => sub * (double.tryParse(sgst.text) ?? 0) / 100;
+  double get cg  => sub * (double.tryParse(cgst.text) ?? 0) / 100;
+  double get sg  => sub * (double.tryParse(sgst.text) ?? 0) / 100;
   double get tot => sub + cg + sg;
-
-  Future<void> _sharePdf() async {
-    final pdf = pw.Document();
-    pdf.addPage(pw.Page(
-      build: (c) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text("SARA INDUSTRIES — TAX INVOICE",
-              style: pw.TextStyle(
-                  fontSize: 16, fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 8),
-          pw.Text(
-              "Invoice: ${inv.text}    Date: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}"),
-          pw.Text("Buyer: ${buyer.text}"),
-          pw.Text("GSTIN: ${gstin.text}"),
-          pw.Text("Addr: ${addr.text}"),
-          pw.SizedBox(height: 8),
-          pw.Table.fromTextArray(
-            headers: ["Description", "Size", "HSN", "Qty", "Rate", "Amount"],
-            data: rows
-                .map((r) => [
-                      r.desc,
-                      sizeLabel(r.size),
-                      r.hsn,
-                      r.qty.toStringAsFixed(2),
-                      r.rate.toStringAsFixed(2),
-                      (r.qty * r.rate).toStringAsFixed(2)
-                    ])
-                .toList(),
-            cellAlignment: pw.Alignment.centerLeft,
-          ),
-          pw.SizedBox(height: 8),
-          pw.Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
-          pw.Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
-          pw.Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
-          pw.Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-        ],
-      ),
-    ));
-    await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: "${inv.text.replaceAll('/', '-')}.pdf");
-  }
 
   void _saveInvoice() {
     final doc = InvoiceDoc(
@@ -751,228 +698,187 @@ class _InvoiceTabState extends State<InvoiceTab> {
         .showSnackBar(const SnackBar(content: Text("Invoice saved")));
   }
 
-  void _openList() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => InvoiceListPage(
-                  state: widget.s,
-                  onLoad: (doc) {
-                    setState(() {
-                      inv.text = doc.number;
-                      buyer.text = doc.buyer;
-                      gstin.text = doc.gstin;
-                      addr.text = doc.address;
-                      rows = doc.rows
-                          .map((e) =>
-                              InvRow(e.desc, e.hsn, e.size, e.qty, e.rate))
-                          .toList();
-                      cgst.text = doc.cgst.toStringAsFixed(2);
-                      sgst.text = doc.sgst.toStringAsFixed(2);
-                    });
-                  },
-                )));
+  Future<void> _sharePdf() async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        build: (c) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text("SARA INDUSTRIES — TAX INVOICE",
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 8),
+            pw.Text("Invoice: ${inv.text}"),
+            pw.Text("Date: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}"),
+            pw.Text("Buyer: ${buyer.text}"),
+            pw.Text("GSTIN: ${gstin.text}"),
+            pw.Text("Address: ${addr.text}"),
+            pw.SizedBox(height: 10),
+            pw.Table.fromTextArray(
+              headers: ["Description", "Size", "HSN", "Qty", "Rate", "Amount"],
+              data: rows.map((r) => [
+                r.desc,
+                sizeLabel(r.size),
+                r.hsn,
+                r.qty.toStringAsFixed(2),
+                r.rate.toStringAsFixed(2),
+                (r.qty * r.rate).toStringAsFixed(2),
+              ]).toList(),
+              cellAlignment: pw.Alignment.centerLeft,
+            ),
+            pw.SizedBox(height: 10),
+            pw.Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
+            pw.Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
+            pw.Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
+            pw.Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: "${inv.text.replaceAll('/', '-')}.pdf",
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    const pad = EdgeInsets.symmetric(horizontal: 12, vertical: 14);
-    const txt = TextStyle(fontSize: 18); // bigger & clearer
+    const txt = TextStyle(fontSize: 16);
 
     return Stack(children: [
       Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 160),
         child: ListView(children: [
           Row(children: [
-            Expanded(
-                child: TextField(
-                    controller: inv,
-                    decoration:
-                        const InputDecoration(labelText: "Invoice No"))),
+            Expanded(child: TextField(
+              controller: inv,
+              decoration: const InputDecoration(labelText: "Invoice No"),
+            )),
             const SizedBox(width: 10),
-            Expanded(
-                child: TextField(
-                    readOnly: true,
-                    decoration: InputDecoration(
-                        labelText: "Date",
-                        hintText: DateFormat('dd-MM-yyyy')
-                            .format(DateTime.now())))),
-            IconButton(
-                onPressed: _openList,
-                tooltip: "Invoices",
-                icon: const Icon(Icons.history))
+            Expanded(child: TextField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Date",
+                hintText: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+              ),
+            )),
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            Expanded(
-                child: TextField(
-                    controller: buyer,
-                    decoration:
-                        const InputDecoration(labelText: "Buyer Name"))),
+            Expanded(child: TextField(
+              controller: buyer,
+              decoration: const InputDecoration(labelText: "Buyer Name"),
+            )),
             const SizedBox(width: 10),
-            Expanded(
-                child: TextField(
-                    controller: gstin,
-                    decoration:
-                        const InputDecoration(labelText: "Buyer GSTIN"))),
+            Expanded(child: TextField(
+              controller: gstin,
+              decoration: const InputDecoration(labelText: "Buyer GSTIN"),
+            )),
           ]),
           const SizedBox(height: 8),
           TextField(
-              controller: addr,
-              decoration: const InputDecoration(labelText: "Buyer Address")),
-          const SizedBox(height: 12),
-          // Header
-          Card(
-              child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(children: const [
-              Expanded(flex: 22, child: Text("Description", style: TextStyle(fontWeight: FontWeight.w700))),
-              Expanded(flex: 12, child: Text("Size", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700))),
-              Expanded(flex: 12, child: Text("HSN", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700))),
-              Expanded(flex: 16, child: Text("Qty", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700))),
-              Expanded(flex: 18, child: Text("Rate", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700))),
-              Expanded(flex: 20, child: Text("Amount", textAlign: TextAlign.end, style: TextStyle(fontWeight: FontWeight.w700))),
-              SizedBox(width: 36),
-            ]),
-          )),
-          const SizedBox(height: 4),
+            controller: addr,
+            decoration: const InputDecoration(labelText: "Buyer Address"),
+          ),
+          const SizedBox(height: 14),
 
-          // Rows
           for (int i = 0; i < rows.length; i++)
             Card(
-                child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(children: [
-                Expanded(
-                    flex: 22,
-                    child: TextField(
-                      controller: TextEditingController(text: rows[i].desc),
-                      onChanged: (v) {
-                        rows[i].desc = v;
-                        _persist();
-                        setState(() {});
-                      },
-                      style: txt,
-                      decoration: const InputDecoration(contentPadding: pad),
-                    )),
-                const SizedBox(width: 6),
-                Expanded(
-                  flex: 12,
-                  child: DropdownButtonFormField<BottleSize>(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(children: [
+                  TextField(
+                    controller: TextEditingController(text: rows[i].desc),
+                    onChanged: (v) { rows[i].desc = v; _persist(); },
+                    style: txt,
+                    decoration: const InputDecoration(labelText: "Description"),
+                  ),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<BottleSize>(
                     value: rows[i].size,
                     items: const [
-                      DropdownMenuItem(
-                          value: BottleSize.ml500, child: Text("500 ml")),
-                      DropdownMenuItem(
-                          value: BottleSize.l1, child: Text("1 L")),
+                      DropdownMenuItem(value: BottleSize.ml500, child: Text("500 ml")),
+                      DropdownMenuItem(value: BottleSize.l1, child: Text("1 L")),
                     ],
-                    onChanged: (v) {
-                      if (v != null) {
-                        rows[i].size = v;
-                        _persist();
-                        setState(() {});
-                      }
-                    },
+                    onChanged: (v) { if (v!=null) { rows[i].size = v; _persist(); setState((){}); } },
+                    decoration: const InputDecoration(labelText: "Size"),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                    flex: 12,
-                    child: TextField(
-                      controller: TextEditingController(text: rows[i].hsn),
-                      onChanged: (v) {
-                        rows[i].hsn = v;
-                        _persist();
-                      },
-                      textAlign: TextAlign.center,
-                      style: txt,
-                      decoration: const InputDecoration(contentPadding: pad),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: TextEditingController(text: rows[i].hsn),
+                    onChanged: (v) { rows[i].hsn = v; _persist(); },
+                    style: txt,
+                    decoration: const InputDecoration(labelText: "HSN"),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    Expanded(child: TextField(
+                      controller: TextEditingController(text: rows[i].qty.toStringAsFixed(2)),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (v) { rows[i].qty = double.tryParse(v) ?? 0; _persist(); setState((){}); },
+                      decoration: const InputDecoration(labelText: "Quantity"),
                     )),
-                const SizedBox(width: 6),
-                Expanded(
-                    flex: 16,
-                    child: TextField(
-                      controller: TextEditingController(
-                          text: rows[i].qty.toStringAsFixed(2)),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      textAlign: TextAlign.center,
-                      style: txt,
-                      onChanged: (v) {
-                        rows[i].qty = double.tryParse(v) ?? 0;
-                        _persist();
-                        setState(() {});
-                      },
-                      decoration: const InputDecoration(contentPadding: pad),
+                    const SizedBox(width: 10),
+                    Expanded(child: TextField(
+                      controller: TextEditingController(text: rows[i].rate.toStringAsFixed(2)),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (v) { rows[i].rate = double.tryParse(v) ?? 0; _persist(); setState((){}); },
+                      decoration: const InputDecoration(labelText: "Rate"),
                     )),
-                const SizedBox(width: 6),
-                Expanded(
-                    flex: 18,
-                    child: TextField(
-                      controller: TextEditingController(
-                          text: rows[i].rate.toStringAsFixed(2)),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      textAlign: TextAlign.center,
-                      style: txt,
-                      onChanged: (v) {
-                        rows[i].rate = double.tryParse(v) ?? 0;
-                        _persist();
-                        setState(() {});
-                      },
-                      decoration: const InputDecoration(contentPadding: pad),
-                    )),
-                const SizedBox(width: 6),
-                Expanded(
-                    flex: 20,
+                  ]),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
                     child: Text(
-                      "₹${(rows[i].qty * rows[i].rate).toStringAsFixed(2)}",
-                      textAlign: TextAlign.end,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w600),
-                    )),
-                IconButton(
-                    onPressed: () {
-                      setState(() => rows.removeAt(i));
-                      _persist();
-                    },
-                    icon: const Icon(Icons.delete_outline)),
-              ]),
-            )),
-          const SizedBox(height: 8),
+                      "Amount: ₹${(rows[i].qty * rows[i].rate).toStringAsFixed(2)}",
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      onPressed: () { setState(() => rows.removeAt(i)); _persist(); },
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+
           Row(children: [
-            Expanded(
-                child: TextField(
-                    controller: cgst,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: "CGST %"),
-                    onChanged: (_) => setState(() {}))),
+            Expanded(child: TextField(
+              controller: cgst,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: "CGST %"),
+              onChanged: (_) => setState((){}),
+            )),
             const SizedBox(width: 10),
-            Expanded(
-                child: TextField(
-                    controller: sgst,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: "SGST %"),
-                    onChanged: (_) => setState(() {}))),
+            Expanded(child: TextField(
+              controller: sgst,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: "SGST %"),
+              onChanged: (_) => setState((){}),
+            )),
           ]),
           const SizedBox(height: 8),
           Card(
-              child: Padding(
-            padding: const EdgeInsets.all(12),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
-              Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
-              Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
-              const SizedBox(height: 4),
-              Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-            ]),
-          )),
-          const SizedBox(height: 10),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text("Subtotal: ₹${sub.toStringAsFixed(2)}"),
+                Text("CGST (${cgst.text}%): ₹${cg.toStringAsFixed(2)}"),
+                Text("SGST (${sgst.text}%): ₹${sg.toStringAsFixed(2)}"),
+                const SizedBox(height: 4),
+                Text("Grand Total: ₹${tot.toStringAsFixed(2)}",
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
         ]),
       ),
-      // action buttons
+
       Positioned(
         bottom: 12,
         right: 12,
@@ -980,55 +886,31 @@ class _InvoiceTabState extends State<InvoiceTab> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             FilledButton.icon(
-                onPressed: _saveInvoice,
-                icon: const Icon(Icons.save),
-                label: const Text("Save")),
+              onPressed: _saveInvoice,
+              icon: const Icon(Icons.save),
+              label: const Text("Save"),
+            ),
             const SizedBox(height: 8),
             FilledButton.icon(
-                onPressed: _sharePdf,
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text("Share PDF")),
+              onPressed: _sharePdf,
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text("Share PDF"),
+            ),
             const SizedBox(height: 8),
             FilledButton.icon(
-                onPressed: () {
-                  setState(() =>
-                      rows.add(InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10)));
-                  _persist();
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("Add item")),
+              onPressed: () {
+                setState(() => rows.add(
+                  InvRow("Water Bottle", "373527", BottleSize.l1, 1, 10),
+                ));
+                _persist();
+              },
+              icon: const Icon(Icons.add),
+              label: const Text("Add item"),
+            ),
           ],
         ),
       ),
     ]);
-  }
-}
-
-class InvoiceListPage extends StatelessWidget {
-  final AppState state;
-  final void Function(InvoiceDoc doc) onLoad;
-  const InvoiceListPage({super.key, required this.state, required this.onLoad});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Invoices")),
-      body: ListView.separated(
-        itemCount: state.invoices.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (_, i) {
-          final v = state.invoices[i];
-          return ListTile(
-            title: Text("${v.number} • ₹${v.total.toStringAsFixed(2)}"),
-            subtitle: Text("${v.buyer} • ${DateFormat('dd-MM-yyyy').format(v.date)}"),
-            trailing: const Icon(Icons.edit),
-            onTap: () {
-              onLoad(v);
-              Navigator.pop(context);
-            },
-          );
-        },
-      ),
-    );
   }
 }
 
@@ -1045,7 +927,7 @@ class OrdersTab extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: s,
-      builder: (_, __) => Scaffold(
+      builder: (_) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
@@ -1138,7 +1020,7 @@ class StockTab extends StatelessWidget {
     final cost = TextEditingController(text: "0");
     return AnimatedBuilder(
       animation: s,
-      builder: (_, __) => Scaffold(
+      builder: (_) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
@@ -1242,7 +1124,7 @@ class MaterialsTab extends StatelessWidget {
     final cur = NumberFormat.currency(locale: "en_IN", symbol: "₹");
     return AnimatedBuilder(
       animation: s,
-      builder: (_, __) => Scaffold(
+      builder: (_) => Scaffold(
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               showDialog(
