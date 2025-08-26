@@ -629,14 +629,15 @@ class _InvoiceTabState extends State<InvoiceTab> {
           TextField(controller: addr, decoration: const InputDecoration(labelText: "Buyer Address")),
           const SizedBox(height: 14),
 
+          // ----- items list (use TextFormField with initialValue so typing doesn't lose focus) -----
           for (int i = 0; i < rows.length; i++)
             Card(
               margin: const EdgeInsets.only(bottom: 10),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(children: [
-                  TextField(
-                    controller: TextEditingController(text: rows[i].desc),
+                  TextFormField(
+                    initialValue: rows[i].desc,
                     onChanged: (v) {
                       rows[i].desc = v;
                       _persist();
@@ -661,8 +662,8 @@ class _InvoiceTabState extends State<InvoiceTab> {
                     decoration: const InputDecoration(labelText: "Size"),
                   ),
                   const SizedBox(height: 6),
-                  TextField(
-                    controller: TextEditingController(text: rows[i].hsn),
+                  TextFormField(
+                    initialValue: rows[i].hsn,
                     onChanged: (v) {
                       rows[i].hsn = v;
                       _persist();
@@ -673,8 +674,8 @@ class _InvoiceTabState extends State<InvoiceTab> {
                   const SizedBox(height: 6),
                   Row(children: [
                     Expanded(
-                        child: TextField(
-                      controller: TextEditingController(text: rows[i].qty.toStringAsFixed(2)),
+                        child: TextFormField(
+                      initialValue: rows[i].qty.toStringAsFixed(2),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) {
                         rows[i].qty = double.tryParse(v) ?? 0;
@@ -685,8 +686,8 @@ class _InvoiceTabState extends State<InvoiceTab> {
                     )),
                     const SizedBox(width: 10),
                     Expanded(
-                        child: TextField(
-                      controller: TextEditingController(text: rows[i].rate.toStringAsFixed(2)),
+                        child: TextFormField(
+                      initialValue: rows[i].rate.toStringAsFixed(2),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) {
                         rows[i].rate = double.tryParse(v) ?? 0;
