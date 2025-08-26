@@ -207,7 +207,8 @@ class AppState extends ChangeNotifier {
   /* helpers */
   void _consumeRaw(String name, int q){ final i = raw.indexWhere((e)=>e.name.toLowerCase()==name.toLowerCase()); if(i>=0) raw[i].qty = (raw[i].qty - q).clamp(0,double.infinity); }
   void _addRaw(String name, int q){ final i = raw.indexWhere((e)=>e.name.toLowerCase()==name.toLowerCase()); if(i>=0) raw[i].qty += q; }
-  void _addFinished(String name, int q){ final i = finished.indexWhere((e)=>e.name.toLowerCase()==name.toLowerCase()); if(i>=0) finished[i].qty += q; else finished.add(StockItem(name: name, uom: "pcs", qty: q)); }
+  void _addFinished(String name, int q){ final i = finished.indexWhere((e)=>e.name.toLowerCase()==name.toLowerCase()); if(i>=0) finished[i].qty ++ q; else finished.add(StockItem(name: name, uom: "pcs", qty: q)); }
+
   void _consumeFinished(String name, int q){ final i = finished.indexWhere((e)=>e.name.toLowerCase()==name.toLowerCase()); if(i>=0) finished[i].qty = (finished[i].qty - q).clamp(0,double.infinity); }
 }
 
