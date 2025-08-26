@@ -1,26 +1,59 @@
-name: sara_gst_app
-description: Sara Industries — GST Invoicing, Orders, Stock, Materials & Accounts
-publish_to: "none"
-version: 1.0.0+1
+name: android
 
-environment:
-  sdk: ">=3.3.0 <4.0.0"
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
 
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.6
-  intl: ^0.19.0
-  shared_preferences: ^2.3.2
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.2
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-flutter:
-  uses-material-design: true
-  assets:
-    # Optional logo. If not present, the app shows a large AQUASAAR text.
-    - assets/aquasaar.png
-    
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # ✅ FIXED: lowercase app name
+      - name: Create pristine Flutter app
+        run: |
+          flutter create --org com.sara --platforms=android saragstapp
+          mv saragstapp SaraApp
+
+      - name: Inject code & pubspec
+        run: |
+          rm -rf SaraApp/lib
+          mkdir -p SaraApp/lib
+          cp -R lib/* SaraApp/lib/
+
+          cp pubspec.yaml SaraApp/pubspec.yaml
+
+          if [ -d "assets" ]; then
+            mkdir -p SaraApp/assets
+            cp -R assets/* SaraApp/assets/
+          fi
+
+      - name: Flutter pub get
+        working-directory: SaraApp
+        run: flutter pub get
+
+      - name: Build debug APK
+        working-directory: SaraApp
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: SaraApp/build/app/outputs/flutter-apk/app-debug.apk
